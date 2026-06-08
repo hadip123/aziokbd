@@ -418,12 +418,13 @@ static int usb_kbd_probe(struct usb_interface *iface,
 	kbd->dev = input_dev;
 
 	if (dev->manufacturer)
-		strlcpy(kbd->name, dev->manufacturer, sizeof(kbd->name));
+		strscpy(kbd->name, dev->manufacturer, sizeof(kbd->name));
 
 	if (dev->product) {
-		if (dev->manufacturer)
-			strlcat(kbd->name, " ", sizeof(kbd->name));
-		strlcat(kbd->name, dev->product, sizeof(kbd->name));
+		size_t len = strlen(kbd->name);
+		if (len && len < sizeof(kbd->name) - 1)
+			kbd->name[len++] = ' ';
+		strscpy(kbd->name + len, dev->product, sizeof(kbd->name) - len);
 	}
 
 	if (!strlen(kbd->name))
